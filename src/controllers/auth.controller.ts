@@ -6,6 +6,7 @@ import type { AuthRequest } from "../middlewares/auth.middleware.js";
 import crypto from "crypto";
 import { sendEmail } from "../config/email.js";
 import { createUserSchema, loginSchema, changePasswordSchema } from "../validators/users.validators.js";
+import { success } from "zod";
 
 // Registration flow: validate input, hash the password, create the user, and send a welcome email.
 export async function register(
@@ -178,7 +179,7 @@ export async function forgotPassword(req: Request, res: Response, next: NextFunc
     // e.g. http://localhost:3000/auth/reset-password/<rawToken>
     console.log(`Reset token for ${email}: ${rawToken}`);
 
-    res.json(successResponse);
+    res.json({successResponse, resetToken: rawToken});
   } catch (error) {
     next(error);
   }
