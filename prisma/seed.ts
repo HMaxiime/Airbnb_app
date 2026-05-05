@@ -1,5 +1,5 @@
 import "dotenv/config";
-import { PrismaClient } from "@prisma/client/edge";
+import { PrismaClient } from "@prisma/client";
 import { PrismaPg } from "@prisma/adapter-pg";
 
 const adapter = new PrismaPg({
@@ -106,7 +106,7 @@ const listing1 = await prisma.listing.create({
     location: "Los Angeles, CA",
     price: 150,
     guests: 3,
-    type: "CABIN",
+    type: "APARTMENT",
     amenities: ["WiFi", "Gym", "Pool"],
     hostId: mike.id,
   },
@@ -125,5 +125,17 @@ const listing2 = await prisma.listing.create({
   },
 });
 
-console.log("🏠 Individual listings created:", listing1.id, listing2.id)
-};
+console.log("🏠 Individual listings created:", listing1.id, listing2.id);
+}
+
+main()
+  .then(() => {
+    console.log("✅ Seed complete");
+  })
+  .catch((error) => {
+    console.error("❌ Seed failed:", error);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

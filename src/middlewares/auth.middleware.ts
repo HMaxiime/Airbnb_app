@@ -14,7 +14,7 @@ const JWT_SECRET_VALUE: string = JWT_SECRET;
 
 // Extend Request to carry userId and role after authentication
 export interface AuthRequest extends Request {
-  userId?: number;
+  userId?: string;
   role?: string;
 }
 
@@ -43,7 +43,7 @@ export function authenticate(
 
   try {
     const decoded = jwt.verify(token, JWT_SECRET_VALUE) as {
-      userId: number;
+      userId: string;
       role: string;
     };
     req.userId = decoded.userId;

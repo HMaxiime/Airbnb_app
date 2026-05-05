@@ -5,14 +5,14 @@ import prisma from "../config/prisma.js";
 
 // Upload a user avatar, store the Cloudinary metadata, and persist the URL on the user record.
 export async function uploadAvatar(req: Request, res: Response) {
-  const id = parseInt(req.params["id"] as string);
+  const id = req.params["id"] as string;
 
   // req.file is set by Multer — if it's missing, no file was sent
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
   }
 
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({ where: { id: id } });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -25,7 +25,7 @@ export async function uploadAvatar(req: Request, res: Response) {
 
   // Save the Cloudinary URL to the user's record in the database
   const updated = await prisma.user.update({
-    where: { id },
+    where: { id: id },
     data: {
        avatar: url, 
         avatarPublicId: publicId, 
@@ -37,9 +37,9 @@ export async function uploadAvatar(req: Request, res: Response) {
 
 // Delete a user avatar from both Cloudinary and the database.
 export async function deleteAvatar(req: Request, res: Response) {
-  const id = parseInt(req.params["id"] as string);
+  const id = req.params["id"] as string;
 
-  const user = await prisma.user.findUnique({ where: { id } });
+  const user = await prisma.user.findUnique({ where: { id: id } });
   if (!user) {
     return res.status(404).json({ error: "User not found" });
   }
@@ -48,7 +48,7 @@ export async function deleteAvatar(req: Request, res: Response) {
   // For simplicity, we're just removing the URL from the database
 
   const updated = await prisma.user.update({
-    where: { id },
+    where: { id: id },
     data: { avatar: null, avatarPublicId: null },
   });
 
@@ -61,13 +61,13 @@ export async function deleteAvatar(req: Request, res: Response) {
 
 // Upload an image for a listing and create a linked photo row.
 export async function uploadListingImage(req: Request, res: Response) {
-  const id = parseInt(req.params["id"] as string);
+  const id = req.params["id"] as string;
 
   if (!req.file) {
     return res.status(400).json({ error: "No file uploaded" });
   }
 
-  const listing = await prisma.listing.findUnique({ where: { id } });
+  const listing = await prisma.listing.findUnique({ where: { id: id } });
   if (!listing) {
     return res.status(404).json({ error: "Listing not found" });
   }
@@ -87,14 +87,14 @@ export async function uploadListingImage(req: Request, res: Response) {
 
 // Remove a listing image record and delete the external asset when possible.
 export async function deleteListingImage(req: Request, res: Response) {
-  const id = parseInt(req.params["id"] as string);
+  const id = req.params["id"] as string;
 
-  const photo = await prisma.listingPhoto.findUnique({ where: { id }, select: { id: true, publicId: true } });
+  const photo = await prisma.listingPhoto.findUnique({ where: { id: id }, select: { id: true, publicId: true } });
   if (!photo) {
     return res.status(404).json({ error: "Image not found" });
   }
   
-  const deleted = await prisma.listingPhoto.delete({ where: { id } });
+  const deleted = await prisma.listingPhoto.delete({ where: { id: id } });
 
   if (photo.publicId) {
     await deleteFromCloudinary(photo.publicId);

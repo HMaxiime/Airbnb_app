@@ -5,9 +5,9 @@ import prisma from "../config/prisma.js";
 import {createUserSchema, updateUserSchema } from "../validators/users.validators.js";  
 
 // Helper to parse and validate integer ID from request params
-function parseUserId(idParam: string): number | null {
-  const id = Number.parseInt(idParam, 10);
-  return Number.isNaN(id) ? null : id;
+function parseUserId(idParam: string): string | null {
+  const id = idParam ;
+  return !id ? null : id;
 }
 
 // List users with simple pagination so large tables stay readable.
@@ -40,7 +40,7 @@ export async function getAllUsers(req: Request, res: Response, next: NextFunctio
 // Fetch one user by id and return a friendly 404 when the record is missing.
 export async function getUserById(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = parseUserId(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
     if (id === null) {
       return res.status(400).json({ error: "Invalid user id" });
@@ -90,7 +90,7 @@ export async function createUser(req: Request, res: Response, next: NextFunction
 // Update a user after parsing the id and removing undefined fields from the payload.
 export async function updateUser(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = parseUserId(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
     if (id === null) {
       return res.status(400).json({ error: "Invalid user id" });
@@ -126,7 +126,7 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
 // Delete a user only after confirming the record exists.
 export async function deleteUser(req: Request, res: Response, next: NextFunction) {
   try {
-    const id = parseUserId(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
     if (id === null) {
       return res.status(400).json({ error: "Invalid user id" });

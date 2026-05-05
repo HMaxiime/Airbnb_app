@@ -1,8 +1,8 @@
 import { z } from "zod";
 
 const bookingBaseSchema = z.object({
-  listingId: z.number().int().positive("Listing ID must be a positive integer"),
-  guestId: z.number().int().positive("Guest ID must be a positive integer").optional(),
+  listingId: z.string().uuid("Listing ID must be a valid UUID"),
+  guestId: z.string().uuid("Guest ID must be a valid UUID").optional(),
   totalPrice: z.number().positive("Total price must be positive"),
   checkIn: z.string().datetime("Invalid checkIn date"),
   checkOut: z.string().datetime("Invalid checkOut date"),

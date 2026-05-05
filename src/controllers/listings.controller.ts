@@ -35,14 +35,14 @@ export async function getListingById(
   next: NextFunction,
 ) {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
-    if (isNaN(id)) {
+    if (!id || typeof id !== 'string') {
       return res.status(400).json({ error: "Invalid listing ID" });
     }
 
     const listing = await prisma.listing.findUnique({
-      where: { id },
+      where: { id: id },
       include: { host: { select: { id: true, name: true, email: true } } },
     });
 
@@ -102,9 +102,9 @@ export async function updateListing(
   next: NextFunction,
 ) {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ error: "Invalid listing ID" });
     }
 
@@ -116,7 +116,7 @@ export async function updateListing(
     }
 
     // Only the host can update their listing
-    if (listing.hostId !== req.userId) {
+    if (listing.hostId !== (req.userId!)) {
       return res.status(403).json({ error: "Forbidden: you can only update your own listings" });
     }
 
@@ -144,9 +144,9 @@ export async function deleteListing(
   next: NextFunction,
 ) {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ error: "Invalid listing ID" });
     }
 
@@ -156,7 +156,7 @@ export async function deleteListing(
     }
 
     // Only the host can delete their listing
-    if (listing.hostId !== req.userId) {
+    if (listing.hostId !== (req.userId!)) {
       return res.status(403).json({ error: "Forbidden: you can only delete your own listings" });
     }
 
@@ -174,9 +174,9 @@ export async function listingstatus(
   next: NextFunction,
 ) {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ error: "Invalid listing ID" });
     }
 

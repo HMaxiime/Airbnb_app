@@ -30,9 +30,9 @@ export const getBookingById = async (
   next: NextFunction,
 ) => {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
-    if (isNaN(id)) {
+    if (Number.isNaN(id)) {
       return res.status(400).json({ message: "Invalid booking ID" });
     }
 
@@ -60,9 +60,10 @@ export const changeBookingStatus = async (
   next: NextFunction,
 ) => {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
+  
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ message: "Invalid booking ID" });
     }
 
@@ -173,9 +174,10 @@ export const deleteBooking = async (
   next: NextFunction,
 ) => {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
+    
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ message: "Invalid booking ID" });
     }
 
@@ -194,9 +196,9 @@ export const updateBooking = async (
   next: NextFunction,
 ) => {
   try {
-    const id = parseInt(req.params["id"] as string);
+    const id = req.params["id"] as string;
 
-    if (isNaN(id)) {
+    if (!id) {
       return res.status(400).json({ message: "Invalid booking ID" });
     }
 
