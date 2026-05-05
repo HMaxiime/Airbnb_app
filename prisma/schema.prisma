@@ -7,7 +7,7 @@ datasource db {
 }
 
 model User {
-  id               String    @id @default(uuid())
+  id               Int       @id @default(autoincrement())
   name             String
   email            String    @unique
   username         String    @unique
@@ -28,12 +28,12 @@ model User {
 }
 
 model Listing {
-  id          String         @id @default(uuid())
+  id          Int            @id @default(autoincrement())
   title       String
   description String
   price       Float
   location    String
-  hostId      String
+  hostId      Int
   host        User           @relation(fields: [hostId], references: [id], onDelete: Cascade)
   createdAt   DateTime       @default(now())
   booking     Booking[]
@@ -45,13 +45,12 @@ model Listing {
 }
 
 model Booking {
-  id         String         @id @default(uuid ())
+  id         Int            @id @default(autoincrement())
   checkIn    DateTime
   checkOut   DateTime
   totalPrice Float         @map("TotalPrice")
-  UserId    String
-  guestId    String
-  listingId  String
+  guestId    Int
+  listingId  Int
   status     bookingStatus @default(PENDING)
   guest      User          @relation(fields: [guestId], references: [id], onDelete: Cascade)
   listing    Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
@@ -59,7 +58,6 @@ model Booking {
   @@index([guestId]) 
   @@index([listingId])
   @@index([listingId, checkIn, checkOut]) 
-  @@index([UserId])
   @@index([status])
 }
 
@@ -67,8 +65,8 @@ model Review {
   id        Int      @id @default(autoincrement())
   rating    Int
   comment   String
-  userId    String
-  listingId String
+  userId    Int
+  listingId Int
   user      User     @relation(fields: [userId], references: [id])
   listing   Listing  @relation(fields: [listingId], references: [id])
   createdAt DateTime @default(now())
@@ -80,7 +78,7 @@ model Review {
 model listingPhoto {
   id        Int     @id @default(autoincrement())
   url       String
-  listingId String
+  listingId Int
   listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
 }
 

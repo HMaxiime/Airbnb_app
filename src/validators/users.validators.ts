@@ -7,7 +7,21 @@ export const createUserSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   phone: z.string().min(7, "Invalid phone number"),
   password: z.string().min(8, "Password must be at least 8 characters"),
-  role: z.enum(["HOST", "GUEST"]).default("GUEST"),
+  role: z.enum(["HOST", "GUEST", "ADMIN"]).default("GUEST"),
 });
 
 export const updateUserSchema = createUserSchema.partial();
+
+// Auth validators
+export const loginSchema = z.object({
+  email: z.string().email("Invalid email format"),
+  password: z.string().min(1, "Password is required"),
+});
+
+export const changePasswordSchema = z.object({
+  currentPassword: z.string().min(1, "Current password is required"),
+  newPassword: z.string().min(8, "New password must be at least 8 characters"),
+}).refine(
+  (data) => data.currentPassword !== data.newPassword,
+  { message: "New password must be different from current password", path: ["newPassword"] }
+);

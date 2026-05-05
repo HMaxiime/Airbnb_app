@@ -1,6 +1,7 @@
 import prisma from "../config/prisma.js";
 import type { Request, Response, NextFunction } from "express";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";
+import { createBookingSchema } from "../validators/bookings.validators.js";
 
 // Return every booking currently stored in the database.
 export const getAllBookings = async (
@@ -9,7 +10,12 @@ export const getAllBookings = async (
   next: NextFunction,
 ) => {
   try {
-    const bookings = await prisma.booking.findMany();
+    const bookings = await prisma.booking.findMany({
+      include: {
+        guest: { select: { id: true, name: true, email: true } },
+        listing: { select: { id: true, title: true, location: true } },
+      },
+    });
     res.status(200).json(bookings);
   } catch (error) {
     next(error);
@@ -23,12 +29,23 @@ export const getBookingById = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const id = req.params["id"] as string;
   try {
-    const booking = await prisma.booking.findUnique({ where: { id } });
+    const id = parseInt(req.params["id"] as string);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid booking ID" });
+    }
+
+    const booking = await prisma.booking.findUnique({
+      where: { id },
+      include: {
+        guest: { select: { id: true, name: true, email: true } },
+        listing: { select: { id: true, title: true, location: true, price: true } },
+      },
+    });
 
     if (!booking) {
-      return res.status(404).json({ Message: "Booking not found" });
+      return res.status(404).json({ message: "Booking not found" });
     }
     res.status(200).json(booking);
   } catch (error) {
@@ -43,26 +60,35 @@ export const changeBookingStatus = async (
   next: NextFunction,
 ) => {
   try {
-    const id = req.params["id"] as string;
+    const id = parseInt(req.params["id"] as string);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid booking ID" });
+    }
+
     const rawStatus = req.body?.status as string | undefined;
 
     if (!rawStatus) {
-      return res.status(400).json({ Message: "Status is required" });
+      return res.status(400).json({ message: "Status is required" });
     }
 
     const normalizedStatus = rawStatus.toUpperCase();
     if (!["PENDING", "CONFIRMED", "CANCELLED"].includes(normalizedStatus)) {
-      return res.status(400).json({ Message: "Invalid status value" });
+      return res.status(400).json({ message: "Invalid status value" });
     }
 
     const existingBooking = await prisma.booking.findUnique({ where: { id } });
     if (!existingBooking) {
-      return res.status(404).json({ Message: "Booking not found" });
+      return res.status(404).json({ message: "Booking not found" });
     }
 
     const updatedBooking = await prisma.booking.update({
       where: { id },
       data: { status: normalizedStatus as "PENDING" | "CONFIRMED" | "CANCELLED" },
+      include: {
+        guest: { select: { id: true, name: true, email: true } },
+        listing: { select: { id: true, title: true } },
+      },
     });
 
     res
@@ -80,38 +106,31 @@ export const createBooking = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const { checkIn, checkOut, totalPrice, listingId } = req.body;
-  const guestIdFromToken = req.userId;
-
-  if (!checkIn || !checkOut || !listingId || totalPrice === undefined || totalPrice === null) {
-    return res
-      .status(400)
-      .json({ Message: "checkIn, checkOut, listingId, and totalPrice are required" });
-  }
-
-  if (!guestIdFromToken) {
-    return res.status(401).json({ Message: "Unauthorized" });
-  }
-
   try {
-    const parsedCheckIn = new Date(checkIn);
-    const parsedCheckOut = new Date(checkOut);
-      const parsedListingId = String(listingId);
-    const parsedTotalPrice = Number(totalPrice);
+    const data = createBookingSchema.parse(req.body);
+    const guestIdFromToken = req.userId;
 
-    if (isNaN(parsedCheckIn.getTime()) || isNaN(parsedCheckOut.getTime())) {
-      return res.status(400).json({ Message: "Invalid date format for checkIn or checkOut" });
+    if (!guestIdFromToken) {
+      return res.status(401).json({ message: "Unauthorized" });
     }
 
-      if (!parsedListingId || typeof parsedListingId !== "string") {
-      return res.status(400).json({ Message: "Invalid numeric values" });
+    // Verify listing exists
+    const listing = await prisma.listing.findUnique({
+      where: { id: data.listingId },
+    });
+
+    if (!listing) {
+      return res.status(404).json({ message: "Listing not found" });
     }
+
+    const parsedCheckIn = new Date(data.checkIn);
+    const parsedCheckOut = new Date(data.checkOut);
 
     const booking = await prisma.$transaction(async (tx) => {
       // Check for conflicts inside the transaction
       const conflict = await tx.booking.findFirst({
         where: {
-            listingId: parsedListingId,
+          listingId: data.listingId,
           status: "CONFIRMED",
           checkIn: { lt: parsedCheckOut },
           checkOut: { gt: parsedCheckIn },
@@ -126,13 +145,16 @@ export const createBooking = async (
       // Safe to create — no conflict found
       return tx.booking.create({
         data: {
-          listingId: parsedListingId,
+          listingId: data.listingId,
           guestId: guestIdFromToken,
-          UserId: guestIdFromToken,
           checkIn: parsedCheckIn,
           checkOut: parsedCheckOut,
-          totalPrice: parsedTotalPrice,
+          totalPrice: data.totalPrice,
           status: "PENDING",
+        },
+        include: {
+          guest: { select: { id: true, name: true, email: true } },
+          listing: { select: { id: true, title: true, location: true } },
         },
       });
     });
@@ -150,11 +172,15 @@ export const deleteBooking = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const id = req.params["id"] as string;
   try {
-    const deletedBooking = await prisma.booking.delete({ where: { id } });
+    const id = parseInt(req.params["id"] as string);
 
-    res.status(200).json({ message: "Booking deleted successfully" });
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid booking ID" });
+    }
+
+    await prisma.booking.delete({ where: { id } });
+    res.status(204).send();
   } catch (error) {
     next(error);
   }
@@ -167,22 +193,36 @@ export const updateBooking = async (
   res: Response,
   next: NextFunction,
 ) => {
-  const id = req.params["id"] as string;
-  const { checkIn, checkOut, totalPrice, listingId, status } = req.body;
   try {
+    const id = parseInt(req.params["id"] as string);
+
+    if (isNaN(id)) {
+      return res.status(400).json({ message: "Invalid booking ID" });
+    }
+
+    const { checkIn, checkOut, totalPrice, listingId, status } = req.body;
+
+    // Validate and convert listingId if provided
+    if (listingId && isNaN(parseInt(listingId))) {
+      return res.status(400).json({ message: "Invalid listing ID" });
+    }
+
+    const updateData: any = {};
+    if (checkIn) updateData.checkIn = checkIn;
+    if (checkOut) updateData.checkOut = checkOut;
+    if (totalPrice) updateData.totalPrice = totalPrice;
+    if (listingId) updateData.listingId = parseInt(listingId);
+    if (status) updateData.status = status;
+
     const updatedBooking = await prisma.booking.update({
       where: { id },
-      data: {
-        checkIn,
-        checkOut,
-        totalPrice,
-        listingId,
-        status,
+      data: updateData,
+      include: {
+        guest: { select: { id: true, name: true, email: true } },
+        listing: { select: { id: true, title: true } },
       },
     });
-    res
-      .status(200)
-      .json({ message: "updated booking successfully", updatedBooking });
+    res.status(200).json({ message: "Booking updated successfully", updatedBooking });
   } catch (error) {
     next(error);
   }
