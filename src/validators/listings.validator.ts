@@ -6,7 +6,9 @@ export const createListingSchema = z.object({
   description: z.string().min(10, "Description must be at least 10 characters"),
   location: z.string().min(2, "Location is required"),
   price: z.number().positive("Price must be a positive number"),
-  type: z.enum(["APARTMENT", "HOUSE", "ROOM", "OTHER"]).optional(),
+  guests: z.number().int().min(1, "At least 1 guest is required"),
+  type: z.enum(["APARTMENT", "HOUSE", "ROOM", "OTHER"]),
+  amenities: z.array(z.string()).min(1, "At least one amenity is required"),
 });
 
 export const updateListingSchema = createListingSchema.partial();

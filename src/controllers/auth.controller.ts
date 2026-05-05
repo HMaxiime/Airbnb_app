@@ -32,9 +32,9 @@ export async function register(
         name: data.name,
         email: data.email,
         username: data.username,
-        phone: data.phone,
         password: hashedPassword,
         role: data.role,
+        ...(data.phone && { phone: data.phone }),
       },
     });
 

@@ -90,7 +90,7 @@ const router = Router();
  *             location: Miami, Florida
  *             price: 150
  *             guests: 4
- *             type: beach_house
+ *             type: APARTMENT
  *             amenities: ["WiFi", "Pool", "Kitchen", "Gym"]
  *     responses:
  *       201:

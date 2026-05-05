@@ -37,11 +37,22 @@ const router = express.Router();
  *     summary: Retrieve a single booking by ID for the authenticated guest
  *     description: Retrieve a single booking by its ID for the authenticated guest. Requires authentication.
  *     tags: [Bookings]
+ *     security:
+ *       - bearerAuth: []
+ *     parameters:
+ *       - in: path
+ *         name: id
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: The booking ID
  *     responses:
  *       200:
  *         description: The requested booking
  *       400:
  *         description: Bad request
+ *       401:
+ *         description: Unauthorized - missing or invalid authentication token
  *       404:
  *         description: Booking not found
  *       500:
@@ -179,10 +190,10 @@ router.post("/", authenticate as RequestHandler, requireGuest as RequestHandler,
  *             properties:
  *               status:
  *                 type: string
- *                 enum: [pending, confirmed, cancelled]
+ *                 enum: [PENDING, CONFIRMED, CANCELLED]
  *             required: [status]
  *           example:
- *             status: confirmed
+ *             status: CONFIRMED
  *     responses:
  *       200:
  *         description: Booking status updated successfully
