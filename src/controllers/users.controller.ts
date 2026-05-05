@@ -71,8 +71,12 @@ export async function createUser(req: Request, res: Response, next: NextFunction
 
     const newUser = await prisma.user.create({
       data: {
-        ...data,
+        name: data.name,
+        email: data.email,
+        username: data.username,
         password: hashedPassword,
+        role: data.role,
+        ...(data.phone && { phone: data.phone }),
       },
       select: { id: true, name: true, email: true, username: true, role: true, createdAt: true },
     });
@@ -96,6 +100,11 @@ export async function updateUser(req: Request, res: Response, next: NextFunction
     const data: Prisma.UserUpdateInput = Object.fromEntries(
       Object.entries(parsedData).filter(([, value]) => value !== undefined)
     ) as Prisma.UserUpdateInput;
+
+    // Ensure we don't pass empty update data
+    if (Object.keys(data).length === 0) {
+      return res.status(400).json({ error: "No valid fields to update" });
+    }
 
     const existingUser = await prisma.user.findUnique({ where: { id } });
 
