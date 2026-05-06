@@ -1,3 +1,4 @@
+// booking.controller.ts: handles controllers functionality.
 import prisma from "../config/prisma.js";
 import type { Request, Response, NextFunction } from "express";
 import type { AuthRequest } from "../middlewares/auth.middleware.js";

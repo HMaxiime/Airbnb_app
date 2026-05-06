@@ -1,13 +1,14 @@
+// users.routes.ts: handles routes functionality.
 import { Router } from "express";
-import { authenticate } from "../middlewares/auth.middleware.js";
-import { strictLimiter } from "../middlewares/rateLimiter.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
+import { strictLimiter } from "../../middlewares/rateLimiter.js";
 import {
   getAllUsers,
   getUserById,
   createUser,
   updateUser,
   deleteUser,
-} from "../controllers/users.controller.js";
+} from "../../controllers/users.controller.js";
 
 const router = Router();
 
@@ -160,10 +161,15 @@ const router = Router();
  *         description: Internal server error
  */
 
+// get: handles get.
 router.get("/", authenticate, strictLimiter, getAllUsers);
+// get: handles get.
 router.get("/:id", authenticate, strictLimiter, getUserById);
+// post: handles post.
 router.post("/", authenticate, strictLimiter, createUser);
+// put: handles put.
 router.put("/:id", authenticate, strictLimiter, updateUser);
+// delete: handles delete.
 router.delete("/:id", authenticate, strictLimiter, deleteUser);
 
 export default router;

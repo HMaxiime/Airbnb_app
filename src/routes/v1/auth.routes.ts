@@ -1,3 +1,4 @@
+// auth.routes.ts: handles routes functionality.
 import { Router } from "express";
 import {
   register,
@@ -6,9 +7,9 @@ import {
   changePassword,
   forgotPassword,
   resetPassword,
-} from "../controllers/auth.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
-import { strictLimiter } from "../middlewares/rateLimiter.js";
+} from "../../controllers/auth.controller.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
+import { strictLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = Router();
 
@@ -165,15 +166,21 @@ const router = Router();
  */
 
 // Registration and login are public, but both are rate limited to reduce abuse.
-router.post("/register", strictLimiter, register); // public
-router.post("/login", strictLimiter, login); // public
+// post: handles post.
+router.post("/register", register); // public
+// post: handles post.
+router.post("/login", login); // public
 
-// Profile and password actions require a valid token.
+// Profile and password actions require a valid token.ç
+// get: handles get.
 router.get("/me", authenticate, getMe); // protected
+// post: handles post.
 router.post("/change-password", authenticate, strictLimiter, changePassword); // protected
 
 // Password recovery stays public, but it is still rate limited.
+// post: handles post.
 router.post("/forgot-password", strictLimiter, forgotPassword); // public
+// post: handles post.
 router.post("/reset-password/:token", strictLimiter, resetPassword); // public
 
 export default router;

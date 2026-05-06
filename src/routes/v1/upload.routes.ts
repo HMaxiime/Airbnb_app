@@ -1,8 +1,9 @@
+// upload.routes.ts: handles routes functionality.
 import { Router } from "express";
-import upload from "../config/multer.js";
-import { uploadAvatar, deleteAvatar, uploadListingImage, deleteListingImage } from "../controllers/upload.controller.js";
-import { authenticate } from "../middlewares/auth.middleware.js";
-import { strictLimiter } from "../middlewares/rateLimiter.js";
+import upload from "../../config/multer.js";
+import { uploadAvatar, deleteAvatar, uploadListingImage, deleteListingImage } from "../../controllers/upload.controller.js";
+import { authenticate } from "../../middlewares/auth.middleware.js";
+import { strictLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = Router();
 
@@ -162,9 +163,13 @@ const router = Router();
 
 // Upload endpoints authenticate first, then rate limit, then process the file body.
 // The field name "image" must match what the client sends in the multipart form.
+// post: handles post.
 router.post("/users/:id/avatar", authenticate, strictLimiter, upload.single("image"), uploadAvatar);
+// delete: handles delete.
 router.delete("/users/:id/avatar", authenticate, strictLimiter, deleteAvatar);
+// post: handles post.
 router.post("/listings/:id/image", authenticate, strictLimiter, upload.single("image"), uploadListingImage);
+// delete: handles delete.
 router.delete("/listings/:id/image", authenticate, strictLimiter, deleteListingImage);
 
 export default router;

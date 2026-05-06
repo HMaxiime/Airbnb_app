@@ -1,15 +1,10 @@
 import express from "express";
-import bookingRouter from "./routes/booking.routes.js";
-import listingsRouter from "./routes/listings.routes.js";
-import usersRouter from "./routes/users.routes.js";
 import { connectDB } from "./config/prisma.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
-import { authenticate } from "./middlewares/auth.middleware.js";
-import authRouter from "./routes/auth.routes.js";
-import uploadRouter from "./routes/upload.routes.js";
 import { setupSwagger } from "./config/swagger.js";
 import compression from "compression";
 import { generalLimiter } from "./middlewares/rateLimiter.js";
+import v1Router from "./routes/v1/index.js";
 
 const app = express();
 const PORT = 3000;
@@ -22,14 +17,10 @@ app.use(express.json());
 // Swagger is mounted before the API routes so the docs are available as soon as the app starts.
 setupSwagger(app); // Set up Swagger documentation
 
-// Public auth routes stay open because users must be able to register and log in.
-app.use("/auth", authRouter);
 
-// Protected routes require authentication at the app level to prevent unauthorized access.
-app.use("/users", authenticate, usersRouter);
-app.use("/bookings", authenticate, bookingRouter); // Bookings require authentication
-app.use("/listings", listingsRouter); // Listings can read publicly; write routes protected inside the router
-app.use("/upload", authenticate, uploadRouter); // Upload routes require authentication at the top level
+
+
+app.use("/api/v1", v1Router);
 
 // Error handling must come last so it can catch failures from every route above.
 app.use(errorHandler); // Global error handler for all routes

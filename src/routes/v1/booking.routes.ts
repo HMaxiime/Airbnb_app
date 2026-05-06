@@ -1,3 +1,4 @@
+// booking.routes.ts: handles routes functionality.
 import express, { type RequestHandler } from "express";
 import {
   createBooking,
@@ -6,9 +7,9 @@ import {
   getBookingById,
   updateBooking,
   changeBookingStatus,
-} from "../controllers/booking.controller.js";
-import { authenticate, requireGuest, requireHost } from "../middlewares/auth.middleware.js";
-import { strictLimiter } from "../middlewares/rateLimiter.js";
+} from "../../controllers/booking.controller.js";
+import { authenticate, requireGuest, requireHost } from "../../middlewares/auth.middleware.js";
+import { strictLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = express.Router();
 
@@ -88,12 +89,15 @@ const router = express.Router();
 
 // Guests can only see their own booking list.
 // Middleware order: authenticate first, then role check, then controller.
+// get: handles get.
 router.get("/", authenticate as RequestHandler, getAllBookings);
 
 // Guests can fetch one booking by id, with the same auth/role protection.
+// get: handles get.
 router.get("/:id", authenticate as RequestHandler, requireGuest as RequestHandler, getBookingById);
 
 // Guests create bookings here, and the strict limiter slows repeated write attempts.
+// post: handles post.
 router.post("/", authenticate as RequestHandler, requireGuest as RequestHandler, strictLimiter, createBooking);
 
 /**
@@ -214,12 +218,15 @@ router.post("/", authenticate as RequestHandler, requireGuest as RequestHandler,
  */
 
 // This endpoint updates booking details such as dates or other editable fields.
+// put: handles put.
 router.put("/:id", authenticate as RequestHandler, requireGuest as RequestHandler, strictLimiter, updateBooking);
 
 // This endpoint removes a booking; it is still limited and protected for guests.
+// delete: handles delete.
 router.delete("/:id", authenticate as RequestHandler, requireGuest as RequestHandler, strictLimiter, deleteBooking);
 
 // Hosts approve or reject bookings, so we check the HOST role here.
+// put: handles put.
 router.put("/approve/:id", authenticate as RequestHandler, requireHost as RequestHandler, strictLimiter, changeBookingStatus);
 
 export default router;

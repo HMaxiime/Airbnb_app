@@ -1,3 +1,4 @@
+// listings.routes.ts: handles routes functionality.
 import { Router } from "express";
 import {
   getAllListings,
@@ -6,9 +7,9 @@ import {
   updateListing,
   deleteListing,
   listingstatus,
-} from "../controllers/listings.controller.js";
-import { authenticate, requireHost } from "../middlewares/auth.middleware.js";
-import { strictLimiter } from "../middlewares/rateLimiter.js";
+} from "../../controllers/listings.controller.js";
+import { authenticate, requireHost } from "../../middlewares/auth.middleware.js";
+import { strictLimiter } from "../../middlewares/rateLimiter.js";
 
 const router = Router();
 
@@ -24,12 +25,7 @@ const router = Router();
  *     responses:
  *       200:
  *         description: A list of property listings
- *         content:
- *           application/json:
- *             schema:
- *               type: array
- *               items:
- *                 $ref: '#/components/schemas/Listing'
+
  *       500:
  *         description: Internal server error
  * 
@@ -181,11 +177,17 @@ const router = Router();
 // Public read routes do not need authentication.
 // Write routes are protected by host auth and the strict limiter.
 
+// get: handles get.
 router.get("/", getAllListings);                              // public
+// get: handles get.
 router.get("/status", listingstatus);                         // public
+// get: handles get.
 router.get("/:id", getListingById);                          // public
+// post: handles post.
 router.post("/", authenticate, requireHost, strictLimiter, createListing);  // HOST only
+// put: handles put.
 router.put("/:id", authenticate, requireHost, strictLimiter, updateListing);             // HOST + owner check in controller
+// delete: handles delete.
 router.delete("/:id", authenticate, requireHost, strictLimiter, deleteListing);          // HOST + owner check in controller
 
 export default router;

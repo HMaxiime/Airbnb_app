@@ -1,9 +1,11 @@
+// upload.controller.ts: handles controllers functionality.
 import type { Request, Response } from "express";
 import { uploadToCloudinary , deleteFromCloudinary } from "../config/cloudinary.js";
 import prisma from "../config/prisma.js";
 
 
 // Upload a user avatar, store the Cloudinary metadata, and persist the URL on the user record.
+// uploadAvatar: handles upload avatar.
 export async function uploadAvatar(req: Request, res: Response) {
   const id = req.params["id"] as string;
 
@@ -36,6 +38,7 @@ export async function uploadAvatar(req: Request, res: Response) {
 }
 
 // Delete a user avatar from both Cloudinary and the database.
+// deleteAvatar: handles delete avatar.
 export async function deleteAvatar(req: Request, res: Response) {
   const id = req.params["id"] as string;
 
@@ -60,6 +63,7 @@ export async function deleteAvatar(req: Request, res: Response) {
 }
 
 // Upload an image for a listing and create a linked photo row.
+// uploadListingImage: handles upload listing image.
 export async function uploadListingImage(req: Request, res: Response) {
   const id = req.params["id"] as string;
 
@@ -86,6 +90,7 @@ export async function uploadListingImage(req: Request, res: Response) {
 }
 
 // Remove a listing image record and delete the external asset when possible.
+// deleteListingImage: handles delete listing image.
 export async function deleteListingImage(req: Request, res: Response) {
   const id = req.params["id"] as string;
 
