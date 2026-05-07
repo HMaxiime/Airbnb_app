@@ -1,4 +1,8 @@
-import express, { type NextFunction, type Request, type Response } from "express";
+import express, {
+  type NextFunction,
+  type Request,
+  type Response,
+} from "express";
 import { connectDB } from "./config/prisma.js";
 import { errorHandler } from "./middlewares/errorHandler.js";
 import { setupSwagger } from "./config/swagger.js";
@@ -14,29 +18,28 @@ const PORT = Number(process.env["PORT"]) || 3000;
 app.use(compression());
 app.use(generalLimiter);
 app.use(express.json());
-app.use(process.env["NODE_ENV"] === "production" ? morgan("combined") : morgan("dev"));
+app.use(
+  process.env["NODE_ENV"] === "production" ? morgan("combined") : morgan("dev"),
+);
 
 // Swagger is mounted before the API routes so the docs are available as soon as the app starts.
 
 setupSwagger(app); // Set up Swagger documentation
-app.use((req: Request, res: Response) => {
-  res.status(404).json({ error: "Route not found" });
-});
 app.get("/health", (req: Request, res: Response) => {
-  res.json({ 
-    status: "ok", 
-    uptime: process.uptime(), 
-    timestamp: new Date() 
+  res.json({
+    status: "ok",
+    uptime: process.uptime(),
+    timestamp: new Date(),
   });
 });
 
-app.use("/api/v1", v1Router);
+app.use("/api/v1", v1Router); 
 
 // Error handling must come last so it can catch failures from every route above.
-app.use(errorHandler); // Global error handler for all routes
 app.use((req: Request, res: Response) => {
   res.status(404).json({ error: "Route not found" });
 });
+app.use(errorHandler); // Global error handler for all routes
 app.use((err: Error, req: Request, res: Response, next: NextFunction) => {
   console.error(err.stack);
   res.status(500).json({ error: "Something went wrong" });
