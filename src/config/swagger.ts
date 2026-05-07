@@ -16,6 +16,10 @@ const options: swaggerJsdoc.Options = {
         url: "http://localhost:3000/api/v1",
         description: "Development server",
       },
+      {
+        url: "https://airbnb-app-pf2j.onrender.com/api/v1",
+        description: "Production server",
+      }
     ],
     components: {
       // Define the Bearer token security scheme
