@@ -31,9 +31,9 @@ app.get("/health", (req: Request, res: Response) => {
     uptime: process.uptime(),
     timestamp: new Date(),
   });
-});
+}); 
 
-app.use("/api/v1", v1Router); 
+app.use("/api/v1", v1Router);
 
 // Error handling must come last so it can catch failures from every route above.
 app.use((req: Request, res: Response) => {
