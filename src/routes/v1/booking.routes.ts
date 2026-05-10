@@ -217,6 +217,10 @@ router.post("/", authenticate as RequestHandler, requireGuest as RequestHandler,
  *         description: Internal server error
  */
 
+// /approve/:id must be registered before /:id so Express does not swallow it as a dynamic segment.
+// put: handles put.
+router.put("/approve/:id", authenticate as RequestHandler, requireHost as RequestHandler, strictLimiter, changeBookingStatus);
+
 // This endpoint updates booking details such as dates or other editable fields.
 // put: handles put.
 router.put("/:id", authenticate as RequestHandler, requireGuest as RequestHandler, strictLimiter, updateBooking);
@@ -224,9 +228,5 @@ router.put("/:id", authenticate as RequestHandler, requireGuest as RequestHandle
 // This endpoint removes a booking; it is still limited and protected for guests.
 // delete: handles delete.
 router.delete("/:id", authenticate as RequestHandler, requireGuest as RequestHandler, strictLimiter, deleteBooking);
-
-// Hosts approve or reject bookings, so we check the HOST role here.
-// put: handles put.
-router.put("/approve/:id", authenticate as RequestHandler, requireHost as RequestHandler, strictLimiter, changeBookingStatus);
 
 export default router;
